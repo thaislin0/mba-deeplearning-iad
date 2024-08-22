@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconhecimento de Dígitos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="file"] {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #preview {
+            margin-top: 20px;
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reconhecimento de Dígitos</h1>
+    <form id="predictionForm">
+        <label for="fileInput">Escolha uma imagem:</label>
+        <input type="file" id="fileInput" accept="image/*">
+        <img id="preview" src="#" alt="Image preview" style="display: none;">
+        <button type="submit">Get Prediction</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('predictionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('fileInput').files[0];
+            const formData = new FormData();
+            formData.append('file', fileInput);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData  // Automatically sets the content type to multipart/form-data
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = `<h3>Prediction: ${data.prediction}</h3>`;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
